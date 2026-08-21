@@ -5,96 +5,64 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>현조캘린더</title>
   <style>
-    :root { --primary: #3b82f6; --accent: #dc2626; --bg: #f4f6f8; --text: #334155; }
-    * { box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); padding: 15px; margin: 0; color: var(--text); }
-    h1 { font-size: 1.5rem; color: #334155; margin-bottom: 15px; text-align: center; font-weight: 800; }
-    
-    /* 탭 메뉴 */
+    :root { --primary: #3b82f6; --accent: #dc2626; --bg: #f4f6f8; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); padding: 15px; margin: 0; color: #334155; }
+    h1 { font-size: 1.5rem; margin-bottom: 20px; text-align: center; font-weight: 800; }
     .tab-bar { display: flex; background: #e2e8f0; border-radius: 10px; padding: 4px; margin-bottom: 15px; }
     .tab-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: bold; background: none; color: #64748b; cursor: pointer; }
     .tab-btn.active { background: white; color: #0f172a; box-shadow: 0 2px 4px rgba(0,0,0,0.08); }
-    
-    .btn-add { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 1rem; font-weight: bold; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 15px; }
-    
-    /* 목록 뷰 카드 */
-    .item-card { background: white; border-radius: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); overflow: hidden; }
-    .card-header { padding: 16px; font-weight: 700; font-size: 1.1rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .btn-add { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 1rem; font-weight: bold; margin-bottom: 15px; }
+    .item-card { background: white; border-radius: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); overflow: hidden; border: 1px solid #e2e8f0; }
+    .card-header { padding: 16px; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
     .card-content { padding: 0 16px 16px 16px; display: none; }
-    
     .input-row { margin: 15px 0; }
     label { display: block; font-size: 0.8rem; color: #64748b; margin-bottom: 5px; font-weight: 600; }
-    input[type="date"], input[type="text"] { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 1rem; background: #fdfdfd; }
-    
-    .result-box { background: #f8fafc; padding: 12px; border-radius: 10px; margin: 10px 0; border: 1px solid #e2e8f0; border-left: 5px solid var(--primary); font-size: 0.9rem; color: #475569; }
+    input { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 1rem; }
+    .result-box { background: #f8fafc; padding: 12px; border-radius: 10px; margin: 10px 0; border-left: 5px solid var(--primary); font-size: 0.9rem; }
     .decision-card { background: #eff6ff; padding: 15px; border-radius: 12px; margin-top: 15px; border: 1px solid #bfdbfe; }
-    .decision-card label { color: var(--primary); font-size: 0.8rem; font-weight: bold; }
-    .decision-date { font-size: 1.1rem; font-weight: 800; color: #1e293b; margin-top: 4px; }
-    
     .d-day { color: var(--accent); font-weight: 700; }
     
-    /* 달력 뷰 스타일 */
+    /* 달력 스타일 */
     .cal-container { background: white; border-radius: 16px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); display: none; }
     .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-    .cal-title { font-size: 1.2rem; font-weight: 800; color: #1e293b; }
-    .cal-nav { background: #f1f5f9; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-    
-    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
-    .cal-day-head { font-size: 0.75rem; font-weight: bold; color: #64748b; padding-bottom: 8px; }
-    .cal-day-head:first-child { color: #dc2626; }
-    .cal-day-head:last-child { color: #2563eb; }
-    
-    .cal-cell { min-height: 75px; background: #fafafa; border-radius: 6px; padding: 4px 2px; font-size: 0.75rem; display: flex; flex-direction: column; align-items: flex-start; }
-    .cal-cell.other-month { opacity: 0.3; background: #f1f5f9; }
-    .cal-cell.today { background: #e0f2fe; outline: 1.5px solid var(--primary); }
-    .cal-num { font-weight: bold; margin-bottom: 3px; padding-left: 2px; }
-    .cal-num.sun { color: #dc2626; }
-    .cal-num.sat { color: #2563eb; }
-    
-    /* 달력 안 일정 뱃지 */
-    .cal-badge { width: 100%; font-size: 0.65rem; padding: 2px 3px; border-radius: 4px; margin-bottom: 2px; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
-    .badge-dispatch { background: #dbeafe; color: #1d4ed8; } /* 발송 */
-    .badge-opinion { background: #fef3c7; color: #b45309; }  /* 의견 */
-    .badge-decision { background: #fee2e2; color: #b91c1c; } /* 결정 */
-
-    .footer { text-align: center; font-size: 0.75rem; color: #94a3b8; margin-top: 30px; padding-bottom: 20px; }
-    dialog { border: none; border-radius: 16px; padding: 25px; width: 85%; }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .cal-day-head { text-align: center; font-size: 0.75rem; font-weight: bold; color: #64748b; padding-bottom: 8px; }
+    .cal-cell { min-height: 80px; background: #fafafa; border-radius: 6px; padding: 4px; font-size: 0.7rem; }
+    .cal-num { font-weight: bold; margin-bottom: 2px; display: block; }
+    .cal-badge { width: 100%; padding: 2px; border-radius: 3px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; font-weight: 600; }
+    .badge-input { background: #e2e8f0; color: #475569; } /* 입력값 스타일 */
+    .badge-dispatch { background: #dbeafe; color: #1d4ed8; }
+    .badge-opinion { background: #fef3c7; color: #b45309; }
+    .badge-decision { background: #fee2e2; color: #b91c1c; }
   </style>
 </head>
 <body>
 
   <h1>현조캘린더</h1>
-
-  <!-- 상단 탭 전환 -->
   <div class="tab-bar">
     <button id="tabListBtn" class="tab-btn active" onclick="switchTab('list')">📋 기관 목록</button>
     <button id="tabCalBtn" class="tab-btn" onclick="switchTab('calendar')">📅 월간 달력</button>
   </div>
 
-  <!-- 1. 목록 뷰 영역 -->
   <div id="listView">
     <button class="btn-add" onclick="document.getElementById('nameDialog').showModal()">+ 기관 추가하기</button>
     <div id="itemList"></div>
   </div>
 
-  <!-- 2. 달력 뷰 영역 -->
   <div id="calView" class="cal-container">
     <div class="cal-header">
-      <button class="cal-nav" onclick="changeMonth(-1)">◀ 이전달</button>
-      <span id="calMonthTitle" class="cal-title"></span>
-      <button class="cal-nav" onclick="changeMonth(1)">다음달 ▶</button>
+      <button onclick="changeMonth(-1)">◀</button>
+      <span id="calMonthTitle" style="font-weight:800;"></span>
+      <button onclick="changeMonth(1)">▶</button>
     </div>
     <div class="cal-grid" id="calGrid"></div>
   </div>
 
-  <div class="footer">제작: 대전세종충청지역본부 요양지원부 박종현</div>
-
-  <!-- 기관 추가 팝업 -->
   <dialog id="nameDialog">
-    <h3 style="margin-top:0">기관 이름</h3>
-    <input type="text" id="orgName" placeholder="기관명을 입력하세요">
+    <h3>기관 이름</h3>
+    <input type="text" id="orgName">
     <div style="display:flex; gap:10px; margin-top:20px;">
-      <button onclick="addOrg()" style="flex:1; padding:10px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:bold;">확인</button>
+      <button onclick="addOrg()" style="flex:1; padding:10px; background:var(--primary); color:white; border:none; border-radius:8px;">확인</button>
       <button onclick="document.getElementById('nameDialog').close()" style="flex:1; padding:10px; background:#e2e8f0; border:none; border-radius:8px;">취소</button>
     </div>
   </dialog>
@@ -104,206 +72,80 @@
     let expanded = JSON.parse(localStorage.getItem('expanded') || '{}');
     let currentCalDate = new Date();
 
-    function save() { 
-      localStorage.setItem('deadlines', JSON.stringify(items)); 
-      renderList();
-      renderCalendar();
+    function save() { localStorage.setItem('deadlines', JSON.stringify(items)); renderList(); renderCalendar(); }
+    function switchTab(t) {
+      document.getElementById('listView').style.display = t==='list'?'block':'none';
+      document.getElementById('calView').style.display = t==='calendar'?'block':'none';
+      document.getElementById('tabListBtn').className = 'tab-btn ' + (t==='list'?'active':'');
+      document.getElementById('tabCalBtn').className = 'tab-btn ' + (t==='calendar'?'active':'');
+      if(t==='calendar') renderCalendar();
     }
-
-    function switchTab(tab) {
-      if (tab === 'list') {
-        document.getElementById('listView').style.display = 'block';
-        document.getElementById('calView').style.display = 'none';
-        document.getElementById('tabListBtn').classList.add('active');
-        document.getElementById('tabCalBtn').classList.remove('active');
-      } else {
-        document.getElementById('listView').style.display = 'none';
-        document.getElementById('calView').style.display = 'block';
-        document.getElementById('tabCalBtn').classList.add('active');
-        document.getElementById('tabListBtn').classList.remove('active');
-        renderCalendar();
-      }
-    }
-
-    function toggleDetails(e, index) {
-      e.stopPropagation(); 
-      expanded[index] = !expanded[index];
-      localStorage.setItem('expanded', JSON.stringify(expanded));
-      renderList();
-    }
-
-    function addOrg() {
-      const name = document.getElementById('orgName').value.trim();
-      if (!name) return;
-      items.push({ id: Date.now(), name, invEndDate: '', sentDate: '', opinionDate: '' });
-      save(); 
-      document.getElementById('orgName').value = ''; 
-      document.getElementById('nameDialog').close();
-    }
-
+    function toggleDetails(e, idx) { e.stopPropagation(); expanded[idx] = !expanded[idx]; localStorage.setItem('expanded', JSON.stringify(expanded)); renderList(); }
+    function addOrg() { const n = document.getElementById('orgName').value; if(!n) return; items.push({ id:Date.now(), name:n, invEndDate:'', sentDate:'', opinionDate:'' }); save(); document.getElementById('nameDialog').close(); }
+    
     function formatDate(d) {
-      const days = ['일', '월', '화', '수', '목', '금', '토'];
-      return `${d.getFullYear()}.${(d.getMonth()+1).toString().padStart(2,'0')}.${d.getDate().toString().padStart(2,'0')}.(${days[d.getDay()]})`;
-    }
-
-    function toDateKey(d) {
-      return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
-    }
-
-    function getDdayString(target) {
-      const today = new Date(); today.setHours(0,0,0,0);
-      const diff = Math.ceil((target - today) / (86400000));
-      let str = diff === 0 ? "D-Day" : (diff > 0 ? `D-${diff}` : `D+${Math.abs(diff)}`);
-      return `${formatDate(target)}까지 ${str}`;
+        return `${d.getFullYear()}.${(d.getMonth()+1).toString().padStart(2,'0')}.${d.getDate().toString().padStart(2,'0')}.`;
     }
 
     function renderList() {
-      const list = document.getElementById('itemList');
-      list.innerHTML = '';
-      items.forEach((item, index) => {
+      const list = document.getElementById('itemList'); list.innerHTML = '';
+      items.forEach((item, i) => {
         const invEnd = item.invEndDate ? new Date(item.invEndDate) : null;
         const sent = item.sentDate ? new Date(item.sentDate) : null;
         const opDate = item.opinionDate ? new Date(item.opinionDate) : null;
-        
-        let dispatchHtml = invEnd ? `<span class="d-day">${getDdayString(new Date(invEnd.getTime() + 30*86400000))}</span>` : "입력 필요";
-        let opinionHtml = sent ? `<span class="d-day">${getDdayString(new Date(sent.getTime() + 14*86400000))}</span>` : "입력 필요";
 
-        let decisionHtml = "입력 필요";
-        if(sent) {
-            let baseDate = opDate ? opDate : sent;
-            let daysToAdd = opDate ? 30 : 15;
-            decisionHtml = `<span class="d-day">${getDdayString(new Date(baseDate.getTime() + daysToAdd*86400000))}</span>`;
-        }
+        const dispDate = invEnd ? new Date(invEnd.getTime() + 30*86400000) : null;
+        const opinDate = sent ? new Date(sent.getTime() + 14*86400000) : null;
+        const decDate = sent ? new Date((opDate ? opDate : sent).getTime() + (opDate ? 30 : 15)*86400000) : null;
 
-        const isExpanded = expanded[index];
-        const el = document.createElement('div');
-        el.className = 'item-card';
+        const el = document.createElement('div'); el.className = 'item-card';
         el.innerHTML = `
-          <div class="card-header" onclick="toggleDetails(event, ${index})">
-            ${item.name} <span>${isExpanded ? '▲' : '▼'}</span>
-          </div>
-          <div class="card-content" style="display: ${isExpanded ? 'block' : 'none'}">
-            <div class="input-row"><label>조사종료일</label><input type="date" value="${item.invEndDate}" onchange="updateData(${index}, 'invEndDate', this.value)"></div>
-            <div class="result-box"><span style="display:block; font-weight:bold; margin-bottom:4px;">지원결과서 발송 가능일</span>${dispatchHtml}</div>
-            
-            <hr style="margin: 20px 0; border: 0; border-top: 1px solid #e2e8f0;">
-            
-            <div class="input-row"><label>지원결과서 발송일</label><input type="date" value="${item.sentDate}" onchange="updateData(${index}, 'sentDate', this.value)"></div>
-            <div class="result-box"><span style="display:block; font-weight:bold; margin-bottom:4px;">의견접수 가능일</span>${opinionHtml}</div>
-            <div class="input-row"><label>의견 접수일 (선택)</label><input type="date" value="${item.opinionDate}" onchange="updateData(${index}, 'opinionDate', this.value)"></div>
-            
-            <div class="decision-card">
-              <label>결정통보 예정일</label>
-              <div class="decision-date">${decisionHtml}</div>
-            </div>
-            <button onclick="deleteItem(${index})" style="width:100%; margin-top:20px; padding:10px; background:none; border:1px solid #fda4af; color:#e11d48; border-radius:8px; font-size:0.85rem;">기관 삭제하기</button>
-          </div>
-        `;
+          <div class="card-header" onclick="toggleDetails(event, ${i})">${item.name} <span>${expanded[i]?'▲':'▼'}</span></div>
+          <div class="card-content" style="display:${expanded[i]?'block':'none'}">
+            <div class="input-row"><label>조사종료일</label><input type="date" value="${item.invEndDate}" onchange="updateData(${i}, 'invEndDate', this.value)"></div>
+            <div class="result-box">발송가능: ${dispDate ? formatDate(dispDate)+'까지 D-'+Math.ceil((dispDate-new Date().setHours(0,0,0,0))/86400000) : '입력필요'}</div>
+            <div class="input-row"><label>지원결과서 발송일</label><input type="date" value="${item.sentDate}" onchange="updateData(${i}, 'sentDate', this.value)"></div>
+            <div class="result-box">의견접수가능: ${opinDate ? formatDate(opinDate)+'까지 D-'+Math.ceil((opinDate-new Date().setHours(0,0,0,0))/86400000) : '입력필요'}</div>
+            <div class="input-row"><label>의견 접수일(선택)</label><input type="date" value="${item.opinionDate}" onchange="updateData(${i}, 'opinionDate', this.value)"></div>
+            <div class="decision-card"><label>결정통보 예정일</label><div class="decision-date">${decDate ? formatDate(decDate)+'까지 D-'+Math.ceil((decDate-new Date().setHours(0,0,0,0))/86400000) : '입력필요'}</div></div>
+            <button onclick="deleteItem(${i})" style="width:100%; margin-top:20px; padding:10px; border:none; color:#e11d48; border-radius:8px;">기관 삭제</button>
+          </div>`;
         list.appendChild(el);
       });
     }
 
-    /* 달력 생성 로직 */
-    function changeMonth(delta) {
-      currentCalDate.setMonth(currentCalDate.getMonth() + delta);
-      renderCalendar();
-    }
-
     function renderCalendar() {
-      const year = currentCalDate.getFullYear();
-      const month = currentCalDate.getMonth();
-      document.getElementById('calMonthTitle').innerText = `${year}년 ${(month+1)}월`;
-
-      // 전체 일정 날짜별로 맵핑
-      const eventMap = {};
-      items.forEach(item => {
-        if (item.invEndDate) {
-          const d = new Date(new Date(item.invEndDate).getTime() + 30*86400000);
-          const k = toDateKey(d);
-          if (!eventMap[k]) eventMap[k] = [];
-          eventMap[k].push({ text: `발송:${item.name}`, type: 'badge-dispatch' });
-        }
-        if (item.sentDate) {
-          const opD = new Date(new Date(item.sentDate).getTime() + 14*86400000);
-          const opK = toDateKey(opD);
-          if (!eventMap[opK]) eventMap[opK] = [];
-          eventMap[opK].push({ text: `의견:${item.name}`, type: 'badge-opinion' });
-
-          const base = item.opinionDate ? new Date(item.opinionDate) : new Date(item.sentDate);
-          const add = item.opinionDate ? 30 : 15;
-          const decD = new Date(base.getTime() + add*86400000);
-          const decK = toDateKey(decD);
-          if (!eventMap[decK]) eventMap[decK] = [];
-          eventMap[decK].push({ text: `결정:${item.name}`, type: 'badge-decision' });
-        }
-      });
-
-      const grid = document.getElementById('calGrid');
-      grid.innerHTML = '';
-
-      const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
-      dayNames.forEach(d => {
-        const dh = document.createElement('div');
-        dh.className = 'cal-day-head';
-        dh.innerText = d;
-        grid.appendChild(dh);
-      });
-
-      const firstDay = new Date(year, month, 1).getDay();
-      const lastDate = new Date(year, month + 1, 0).getDate();
-      const prevLastDate = new Date(year, month, 0).getDate();
-
-      const todayStr = toDateKey(new Date());
-
-      // 지난달 날짜
-      for (let i = firstDay - 1; i >= 0; i--) {
-        const cell = document.createElement('div');
-        cell.className = 'cal-cell other-month';
-        cell.innerHTML = `<span class="cal-num">${prevLastDate - i}</span>`;
-        grid.appendChild(cell);
-      }
-
-      // 이번달 날짜 + 스티커(뱃지) 렌더링
-      for (let date = 1; date <= lastDate; date++) {
-        const dateObj = new Date(year, month, date);
-        const dateKey = toDateKey(dateObj);
-        const dayOfWeek = dateObj.getDay();
-
-        const cell = document.createElement('div');
-        cell.className = 'cal-cell' + (dateKey === todayStr ? ' today' : '');
-
-        let numClass = 'cal-num';
-        if (dayOfWeek === 0) numClass += ' sun';
-        if (dayOfWeek === 6) numClass += ' sat';
-
-        let html = `<span class="${numClass}">${date}</span>`;
-
-        if (eventMap[dateKey]) {
-          eventMap[dateKey].forEach(ev => {
-            html += `<div class="cal-badge ${ev.type}">${ev.text}</div>`;
-          });
-        }
-
-        cell.innerHTML = html;
-        grid.appendChild(cell);
-      }
-
-      // 다음달 채우기
-      const totalCells = firstDay + lastDate;
-      const remaining = 7 - (totalCells % 7);
-      if (remaining < 7) {
-        for (let i = 1; i <= remaining; i++) {
-          const cell = document.createElement('div');
-          cell.className = 'cal-cell other-month';
-          cell.innerHTML = `<span class="cal-num">${i}</span>`;
-          grid.appendChild(cell);
-        }
+      const year = currentCalDate.getFullYear(), month = currentCalDate.getMonth();
+      document.getElementById('calMonthTitle').innerText = `${year}년 ${month+1}월`;
+      const grid = document.getElementById('calGrid'); grid.innerHTML = '';
+      ['일','월','화','수','목','금','토'].forEach(d => grid.innerHTML += `<div class="cal-day-head">${d}</div>`);
+      
+      const first = new Date(year, month, 1).getDay(), last = new Date(year, month+1, 0).getDate();
+      for(let i=0; i<first; i++) grid.innerHTML += `<div class="cal-cell" style="background:none"></div>`;
+      
+      for(let d=1; d<=last; d++) {
+        const key = `${year}-${(month+1).toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}`;
+        let html = `<span class="cal-num">${d}</span>`;
+        items.forEach(it => {
+            if(it.invEndDate === key) html += `<div class="cal-badge badge-input">종료:${it.name}</div>`;
+            if(it.sentDate === key) html += `<div class="cal-badge badge-input">발송:${it.name}</div>`;
+            if(it.opinionDate === key) html += `<div class="cal-badge badge-input">접수:${it.name}</div>`;
+            
+            if(it.invEndDate && formatDate(new Date(new Date(it.invEndDate).getTime() + 30*86400000)) === formatDate(new Date(year, month, d))) html += `<div class="cal-badge badge-dispatch">발송:${it.name}</div>`;
+            if(it.sentDate && formatDate(new Date(new Date(it.sentDate).getTime() + 14*86400000)) === formatDate(new Date(year, month, d))) html += `<div class="cal-badge badge-opinion">의견:${it.name}</div>`;
+            
+            const base = it.opinionDate ? new Date(it.opinionDate) : (it.sentDate ? new Date(it.sentDate) : null);
+            if(base) {
+                const target = new Date(base.getTime() + (it.opinionDate ? 30 : 15)*86400000);
+                if(formatDate(target) === formatDate(new Date(year, month, d))) html += `<div class="cal-badge badge-decision">결정:${it.name}</div>`;
+            }
+        });
+        grid.innerHTML += `<div class="cal-cell">${html}</div>`;
       }
     }
-
+    function changeMonth(n) { currentCalDate.setMonth(currentCalDate.getMonth()+n); renderCalendar(); }
     function updateData(i, k, v) { items[i][k] = v; save(); }
-    function deleteItem(i) { if(confirm('이 기관을 삭제할까요?')) { items.splice(i, 1); save(); } }
-
+    function deleteItem(i) { if(confirm('삭제?')) { items.splice(i, 1); save(); } }
     renderList();
   </script>
 </body>
