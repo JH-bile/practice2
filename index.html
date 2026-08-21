@@ -22,7 +22,6 @@
     .decision-card { background: #eff6ff; padding: 15px; border-radius: 12px; margin-top: 15px; border: 1px solid #bfdbfe; }
     .d-day { color: var(--accent); font-weight: 700; }
     
-    /* 달력 스타일 */
     .cal-container { background: white; border-radius: 16px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); display: none; }
     .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
     .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
@@ -30,10 +29,12 @@
     .cal-cell { min-height: 80px; background: #fafafa; border-radius: 6px; padding: 4px; font-size: 0.7rem; }
     .cal-num { font-weight: bold; margin-bottom: 2px; display: block; }
     .cal-badge { width: 100%; padding: 2px; border-radius: 3px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; font-weight: 600; }
-    .badge-input { background: #e2e8f0; color: #475569; } /* 입력값 스타일 */
+    .badge-input { background: #e2e8f0; color: #475569; }
     .badge-dispatch { background: #dbeafe; color: #1d4ed8; }
     .badge-opinion { background: #fef3c7; color: #b45309; }
     .badge-decision { background: #fee2e2; color: #b91c1c; }
+    .footer { text-align: center; font-size: 0.75rem; color: #94a3b8; margin-top: 30px; padding-bottom: 20px; }
+    dialog { border: none; border-radius: 16px; padding: 25px; width: 85%; }
   </style>
 </head>
 <body>
@@ -58,6 +59,8 @@
     <div class="cal-grid" id="calGrid"></div>
   </div>
 
+  <div class="footer">제작: 대전세종충청지역본부 요양지원부 박종현</div>
+
   <dialog id="nameDialog">
     <h3>기관 이름</h3>
     <input type="text" id="orgName">
@@ -81,10 +84,23 @@
       if(t==='calendar') renderCalendar();
     }
     function toggleDetails(e, idx) { e.stopPropagation(); expanded[idx] = !expanded[idx]; localStorage.setItem('expanded', JSON.stringify(expanded)); renderList(); }
-    function addOrg() { const n = document.getElementById('orgName').value; if(!n) return; items.push({ id:Date.now(), name:n, invEndDate:'', sentDate:'', opinionDate:'' }); save(); document.getElementById('nameDialog').close(); }
+    function addOrg() { const n = document.getElementById('orgName').value; if(!n) return; items.push({ id:Date.now(), name:n, invEndDate:'', sentDate:'', opinionDate:'' }); save(); document.getElementById('orgName').value = ''; document.getElementById('nameDialog').close(); }
     
+    // 수정 함수 추가
+    function renameItem(i) {
+        const newName = prompt('기관 이름을 수정하세요:', items[i].name);
+        if(newName && newName.trim() !== '') { items[i].name = newName.trim(); save(); }
+    }
+
     function formatDate(d) {
         return `${d.getFullYear()}.${(d.getMonth()+1).toString().padStart(2,'0')}.${d.getDate().toString().padStart(2,'0')}.`;
+    }
+
+    function getDdayString(target) {
+      const today = new Date(); today.setHours(0,0,0,0);
+      const diff = Math.ceil((target - today) / (86400000));
+      let str = diff === 0 ? "D-Day" : (diff > 0 ? `D-${diff}` : `D+${Math.abs(diff)}`);
+      return `${formatDate(target)}까지 ${str}`;
     }
 
     function renderList() {
@@ -103,12 +119,15 @@
           <div class="card-header" onclick="toggleDetails(event, ${i})">${item.name} <span>${expanded[i]?'▲':'▼'}</span></div>
           <div class="card-content" style="display:${expanded[i]?'block':'none'}">
             <div class="input-row"><label>조사종료일</label><input type="date" value="${item.invEndDate}" onchange="updateData(${i}, 'invEndDate', this.value)"></div>
-            <div class="result-box">발송가능: ${dispDate ? formatDate(dispDate)+'까지 D-'+Math.ceil((dispDate-new Date().setHours(0,0,0,0))/86400000) : '입력필요'}</div>
+            <div class="result-box"><span style="display:block; font-weight:bold; margin-bottom:4px;">지원결과서 발송 가능일</span>${dispDate ? getDdayString(dispDate) : '입력필요'}</div>
             <div class="input-row"><label>지원결과서 발송일</label><input type="date" value="${item.sentDate}" onchange="updateData(${i}, 'sentDate', this.value)"></div>
-            <div class="result-box">의견접수가능: ${opinDate ? formatDate(opinDate)+'까지 D-'+Math.ceil((opinDate-new Date().setHours(0,0,0,0))/86400000) : '입력필요'}</div>
+            <div class="result-box"><span style="display:block; font-weight:bold; margin-bottom:4px;">의견접수 가능일</span>${opinDate ? getDdayString(opinDate) : '입력필요'}</div>
             <div class="input-row"><label>의견 접수일(선택)</label><input type="date" value="${item.opinionDate}" onchange="updateData(${i}, 'opinionDate', this.value)"></div>
-            <div class="decision-card"><label>결정통보 예정일</label><div class="decision-date">${decDate ? formatDate(decDate)+'까지 D-'+Math.ceil((decDate-new Date().setHours(0,0,0,0))/86400000) : '입력필요'}</div></div>
-            <button onclick="deleteItem(${i})" style="width:100%; margin-top:20px; padding:10px; border:none; color:#e11d48; border-radius:8px;">기관 삭제</button>
+            <div class="decision-card"><label>결정통보 예정일</label><div class="decision-date">${decDate ? getDdayString(decDate) : '입력필요'}</div></div>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button onclick="renameItem(${i})" style="flex:1; padding:10px; background:#e2e8f0; border:none; border-radius:8px;">이름 수정</button>
+                <button onclick="deleteItem(${i})" style="flex:1; padding:10px; background:#fee2e2; color:#e11d48; border:none; border-radius:8px;">기관 삭제</button>
+            </div>
           </div>`;
         list.appendChild(el);
       });
